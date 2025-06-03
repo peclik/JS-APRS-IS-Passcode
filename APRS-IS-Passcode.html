@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>APRS-IS Passcode Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 400px;
+      margin: 2em auto;
+      padding: 1em;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    input, button {
+      padding: 0.5em;
+      margin-top: 0.5em;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    #output {
+      margin-top: 1em;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h2>APRS-IS Passcode Generator</h2>
+  <label for="callsign">Enter Callsign:</label>
+  <input type="text" id="callsign" placeholder="eg. OK1ABC" />
+  <button onclick="generatePasscode()">Generate passcode</button>
+  <div id="output"></div>
+
+  <script>
+    function aprsPasscode(callsign) {
+      // initialize hash
+      let hash = 0x73e2;
+      callsign = callsign.toUpperCase();
+      callsign = callsign.split('-')[0]; // skip SSID
+
+      for (let i = 0; i < callsign.length; i += 2) {
+        hash ^= callsign.charCodeAt(i) << 8;
+        hash ^= callsign.charCodeAt(i+1);
+      }
+      // mask off the high bit so number is always positive
+      return hash & 0x7FFF;
+    }
+
+    function generatePasscode() {
+      const callsign = document.getElementById("callsign").value.trim();
+      if (!callsign) {
+        document.getElementById("output").textContent = "Enter Callsign first.";
+        return;
+      }
+      const code = aprsPasscode(callsign);
+      document.getElementById("output").textContent =
+        `Passcode for "${callsign}" is: ${code}`;
+    }
+  </script>
+</body>
+</html>
